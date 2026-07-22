@@ -76,7 +76,7 @@ struct Var {
 
 static Var read_var(const wchar_t* name, const wchar_t* guid) {
     Var v;
-    DWORD attrs = 1;
+    DWORD attrs = 0;
     std::vector<uint8_t> tmp(512);
     for (int attempt = 0; attempt < 12; attempt++) {
         SetLastError(0);
@@ -128,7 +128,6 @@ static std::string dp_text(const uint8_t* p, uint16_t len, uint8_t type, uint8_t
             snprintf(b, sizeof b, "Acpi(HID 0x%08X, UID 0x%08X)", rd32(p + 4), rd32(p + 8));
         else snprintf(b, sizeof b, "Acpi(%02X)", sub);
         break;
-    /* revisit */
     case 0x03:
         snprintf(b, sizeof b, "Msg(%02X)", sub);
         break;
@@ -259,7 +258,6 @@ static bool enable_privilege(const wchar_t* name) {
     TOKEN_PRIVILEGES tp{};
     bool ok = false;
     if (LookupPrivilegeValueW(nullptr, name, &tp.Privileges[0].Luid)) {
-    /* revisit */
         tp.PrivilegeCount = 1;
         tp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
         SetLastError(0);
@@ -390,3 +388,58 @@ static void dump_firmware(const wchar_t* guid) {
     print_u16(L"SetupMode", guid);
     print_var_hex(L"PK", kSecDb);
     print_var_hex(L"KEK", kSecDb);
+}
+
+int wmain(int argc, wchar_t** argv) {
+    const wchar_t* guid = kGlobal;
+    const wchar_t* only = nullptr;
+    const wchar_t* offline_path = nullptr;
+    const wchar_t* emit_path = nullptr;
+    bool raw = false;
+
+    for (int i = 1; i < argc; i++) {
+        if (!wcscmp(argv[i], L"--selftest")) return selftest();
+        else if (!wcscmp(argv[i], L"--emit") && i + 1 < argc) emit_path = argv[++i];
+        else if (!wcscmp(argv[i], L"--offline") && i + 1 < argc) offline_path = argv[++i];
+        else if (!wcscmp(argv[i], L"--var") && i + 1 < argc) only = argv[++i];
+        else if (!wcscmp(argv[i], L"--guid") && i + 1 < argc) guid = argv[++i];
+        else if (!wcscmp(argv[i], L"--raw")) raw = true;
+        else {
+            printf("bootvars [--offline file] [--var name] [--guid guid] [--raw] [--selftest] [--emit file]\n");
+            return 2;
+        }
+    }
+
+    if (emit_path) {
+        auto b = make_fixture();
+        HANDLE h = CreateFileW(emit_path, GENERIC_WRITE, 0, nullptr,
+                               CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+        if (h == INVALID_HANDLE_VALUE) return 1;
+        DWORD put = 0;
+        WriteFile(h, b.data(), (DWORD)b.size(), &put, nullptr);
+        CloseHandle(h);
+        printf("%ls  %zu bytes\n", emit_path, b.size());
+        return 0;
+    }
+
+    if (offline_path) return offline(offline_path);
+
+    if (only) {
+        if (raw) { print_var_hex(only, guid); return 0; }
+        Var v = read_var(only, guid);
+        if (!v.ok) {
+            printf("%ls unavailable (0x%08lX)\n", only, v.err);
+            return 1;
+        }
+        LoadOption o = parse_option(v.b.data(), v.b.size());
+        if (o.ok) print_option(o, only);
+        else print_var_hex(only, guid);
+        return 0;
+    }
+
+    printf("privilege SeSystemEnvironmentPrivilege: %s\n",
+           enable_privilege(SE_SYSTEM_ENVIRONMENT_NAME) ? "enabled" : "not held");
+    printf("note: needs uefi firmware + elevated process. --offline works without either.\n\n");
+    dump_firmware(guid);
+    return 0;
+}
