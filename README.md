@@ -9,20 +9,18 @@ needs uefi + an elevated process; on this machine it returns
 `ERROR_PRIVILEGE_NOT_HELD` (0x522), which is what `example/firmware.txt` shows.
 signed variable lists (PK/KEK/db) are dumped as bytes, not parsed yet.
 
-TODO: expand this section
 ```
 build.bat
 ```
 
 ```
 build\bootvars.exe --selftest
-build\bootvars.exe --offline tests\fixtures\boot2.bin
+build\bootvars.exe --offline tests\fixtures\boot0001.bin
 build\bootvars.exe --var Boot0001
 build\bootvars.exe --var PK --guid {d719b2cb-3d3a-4596-a3bc-dad00e67656f} --raw
 build\bootvars.exe --emit my.bin
 ```
 
-TODO: expand this section
 `--emit` writes the same synthetic `EFI_LOAD_OPTION` the selftest uses, so you
 can round-trip it through `--offline`.
 
@@ -35,3 +33,8 @@ load option  attrs 0x00000001 [ACTIVE ]
   [2]      End (type 7F sub FF len 4)
   optional  8 bytes
   0000  57 49 4E 44 4F 57 53 00                          |WINDOWS.|
+```
+
+full output in `example/`. `notes.txt` has the layout details and the two api
+behaviours that cost me an afternoon. x64 windows, msvc, no dependencies beyond
+`advapi32.lib` for the privilege enable.
