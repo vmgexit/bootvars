@@ -1,0 +1,16 @@
+privilege SeSystemEnvironmentPrivilege: not held
+note: needs uefi firmware + elevated process. --offline works without either.
+
+firmware variables  guid {8BE4DF61-93CA-11D2-AA0D-00E098032B8C}
+  BootCurrent    <0x00000522>
+  BootNext       <0x00000522>
+  Timeout        <0x00000522>
+  BootOrder      <0x00000522>
+
+BootOrder unavailable (0x00000522)
+
+secure boot
+  SecureBoot     <0x00000522>
+  SetupMode      <0x00000522>
+  PK             <0x00000522>
+  KEK            <0x00000522>
