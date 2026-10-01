@@ -1,0 +1,11 @@
+selftest: synthetic EFI_LOAD_OPTION (172 bytes)
+  ok    parsed
+  ok    attributes == ACTIVE
+  ok    description
+  ok    file path list length
+  ok    three device path nodes
+  ok    first node is HD()
+  ok    second node is File()
+  ok    last node is End
+  ok    optional data
+  PASS
