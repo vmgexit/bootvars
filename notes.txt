@@ -1,0 +1,18 @@
+- GetFirmwareEnvironmentVariableExW returns the required size in the return
+  value *and* sets ERROR_INSUFFICIENT_BUFFER. handle both, do not just trust
+  GetLastError.
+- a zero-length variable is a success with return 0 and ERROR_SUCCESS. easy to
+  misread as failure.
+- needs SeSystemEnvironmentPrivilege, which you only get elevated. on a legacy
+  bios box the call fails with ERROR_INVALID_FUNCTION, not a privilege error.
+- Boot#### is uppercase hex, 4 digits. Boot0001, not Boot1.
+- EFI_LOAD_OPTION: UINT32 attributes, UINT16 FilePathListLength, then a
+  null-terminated CHAR16 description, then the device path bytes, then optional
+  data. the description length is *not* a field, so you have to scan for the nul.
+- HARDDRIVE_DEVICE_PATH is 42 bytes: part num, start, size, 16-byte signature,
+  mbr type, signature type. signature type 1 with mbr type 2 means the 16 bytes
+  are a GPT partition GUID.
+- the GUID string form for the win32 api is "{...}" with braces, one string.
+  passing the vendor GUID struct does not work.
+- secure boot variables (PK/KEK/db/dbx) live under the image security database
+  GUID, not the global variable GUID.
