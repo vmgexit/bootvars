@@ -391,6 +391,7 @@ static void dump_firmware(const wchar_t* guid) {
 }
 
 int wmain(int argc, wchar_t** argv) {
+    bool have_priv = enable_privilege(SE_SYSTEM_ENVIRONMENT_NAME);
     const wchar_t* guid = kGlobal;
     const wchar_t* only = nullptr;
     const wchar_t* offline_path = nullptr;
@@ -438,7 +439,7 @@ int wmain(int argc, wchar_t** argv) {
     }
 
     printf("privilege SeSystemEnvironmentPrivilege: %s\n",
-           enable_privilege(SE_SYSTEM_ENVIRONMENT_NAME) ? "enabled" : "not held");
+           have_priv ? "enabled" : "not held");
     printf("note: needs uefi firmware + elevated process. --offline works without either.\n\n");
     dump_firmware(guid);
     return 0;

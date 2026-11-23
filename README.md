@@ -35,6 +35,7 @@ load option  attrs 0x00000001 [ACTIVE ]
   0000  57 49 4E 44 4F 57 53 00                          |WINDOWS.|
 ```
 
-full output in `example/`. `notes.txt` has the layout details and the two api
-behaviours that cost me an afternoon. x64 windows, msvc, no dependencies beyond
-`advapi32.lib` for the privilege enable.
+full output in `example/`. `notes.txt` has the layout details and the api
+behaviours that are easy to misread. privilege is enabled for every variable
+read, including `--var`, not just the full dump. x64 windows, msvc, no
+dependencies beyond `advapi32.lib` for the privilege enable.
