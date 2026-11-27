@@ -14,3 +14,4 @@ secure boot
   SetupMode      <0x00000522>
   PK             <0x00000522>
   KEK            <0x00000522>
+  db             <0x00000522>

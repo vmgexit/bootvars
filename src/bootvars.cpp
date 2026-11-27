@@ -388,6 +388,7 @@ static void dump_firmware(const wchar_t* guid) {
     print_u16(L"SetupMode", guid);
     print_var_hex(L"PK", kSecDb);
     print_var_hex(L"KEK", kSecDb);
+    print_var_hex(L"db", kSecDb);
 }
 
 int wmain(int argc, wchar_t** argv) {
